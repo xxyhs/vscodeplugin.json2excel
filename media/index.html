@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none';
+               style-src {{styleUri}};
+               script-src 'nonce-{{nonce}}';
+               img-src https: data:;
+               font-src https:;
+      ">
+
+    <link href="{{styleUri}}" rel="stylesheet">
+</head>
+
+<body>
+
+    <div id="app">
+        <div class="title">
+            <button @click="exportExcel">Export</button>
+            <button @click="saveSettings">Save Settings</button>
+        </div>
+        <div v-if="cachedSettings && cachedSettings.length">
+            已缓存设置
+        </div>
+        <div>
+            <table>
+                <tr>
+                    <td v-for="key in Object.keys(jsonData[0])"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <script nonce="{{nonce}}" src="{{vueUri}}"></script>
+    <script nonce="{{nonce}}" src="{{scriptUri}}"></script>
+</body>
+
+</html>

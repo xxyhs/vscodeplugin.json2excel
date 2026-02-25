@@ -1,0 +1,8 @@
+{
+  "name": "Excel导出",
+  "decription": "从选择的json数组或者指定的json文件导出Excel",
+  "command.category": "JSON导出Excel",
+  "command.showExportSettings.title": "JSON导出到Excel",
+  "exportSettingIcon.title": "打开导出设置面板",
+  "exportSettingPannel.title": "导出设置"
+}

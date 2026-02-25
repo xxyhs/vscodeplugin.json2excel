@@ -1,0 +1,8 @@
+{
+  "name": "ExcelExporter",
+  "decription": "Export excel from the selected json text or specified json file",
+  "command.category": "JSON to Excel",
+  "command.showExportSettings.title": "Export Excel From JSON Excel",
+  "exportSettingIcon.title": "Open Export Setting Pannel",
+  "exportSettingPannel.title": "Export Settings"
+}
