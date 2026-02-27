@@ -1,0 +1,19 @@
+body {
+    font-family: var(--vscode-font-family);
+    color: var(--vscode-foreground);
+    background: var(--vscode-editor-background);
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    border: 1px solid var(--vscode-editorWidget-border);
+    padding: 6px;
+}
+
+th {
+    background: var(--vscode-editorWidget-background);
+}

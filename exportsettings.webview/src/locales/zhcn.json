@@ -1,0 +1,13 @@
+{
+  "Export Excel": "导出Excel",
+  "Save Settings": "保存设置",
+  "History Settings": "历史设置：",
+  "Do not use history settings": "不使用历史设置",
+  "Export": "导出",
+  "Property Name": "属性",
+  "Column Name": "Excel列名",
+  "Column Type": "Excel类型",
+  "String": "文本",
+  "Number": "数字",
+  "Date": "日期"
+}

@@ -1,0 +1,21 @@
+{
+  "displayName": "JSON转Excel导出",
+  "decription": "从选择的json数组或者指定的json文件导出Excel",
+  "command.category": "JSON导出Excel",
+  "command.showExportSettings.title": "JSON导出到Excel",
+  "exportSettingIcon.title": "打开导出设置面板",
+  "exportSettingPannel.title": "导出设置",
+
+  "information.invaidjson": "无效格式JSON",
+  "information.notjsonarray": "所选择的JSON不是一个数组",
+  "information.settingsaved": "导出设置已保存",
+  "information.filesaved": "文件已保存到{0}",
+  "information.fileexisted": "文件名已存在",
+  "information.coverit": "覆盖它",
+  "information.rename": "重命名",
+  "information.saveforbid": "由于可能的系统设置导致当前无法保存设置",
+  "information.settingNameTitle": "导出设置命名",
+  "information.settingNamePlaceholder": "请输入导出设置名称",
+  "information.settingNameError": "文件名包含无效字符",
+  "information.settingNameTooLong": "文件名太长"
+}

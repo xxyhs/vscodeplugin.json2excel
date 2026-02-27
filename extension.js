@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
 const Json2ExcelPanelProvider = require('./Json2ExcelPanelProvider');
+
 let currentPanel = undefined;
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -33,7 +34,7 @@ function activate(context) {
 		} else {
 			currentPanel = vscode.window.createWebviewPanel(
 				'JSON2ExcelWebView',
-				'ExporterSettings',
+				vscode.l10n.t('exportSettingPannel.title'),
 				vscode.ViewColumn.Beside,
 				{
 					enableScripts: true,
@@ -67,12 +68,11 @@ function parseJsonArray(provider) {
 	if (!text && editor.document.languageId === 'json') {
 		text = editor.document.getText()
 	}
-	console.log('get active text:', text)
 	try {
 		const json = JSON.parse(text);
 
 		if (!Array.isArray(json)) {
-			vscode.window.showErrorMessage('Selected JSON is not an array');
+			vscode.window.showErrorMessage(vscode.l10n.t('information.notjsonarray'));
 			return;
 		}
 
@@ -85,7 +85,7 @@ function parseJsonArray(provider) {
 			type: 'jsonUpdate',
 			payload: []
 		});
-		vscode.window.showErrorMessage('Invalid JSON');
+		vscode.window.showErrorMessage(vscode.l10n.t('information.invaidjson'));
 	}
 }
 

@@ -1,5 +1,5 @@
 {
-  "name": "Excel导出",
+  "displayName": "JSON转Excel导出",
   "decription": "从选择的json数组或者指定的json文件导出Excel",
   "command.category": "JSON导出Excel",
   "command.showExportSettings.title": "JSON导出到Excel",

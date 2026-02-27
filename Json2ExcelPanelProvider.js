@@ -1,8 +1,9 @@
+const dayjs = require('dayjs');
 const vscode = require('vscode');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { fastExport } = require('./Json2ExcelService')
+const { fastExport } = require('./Json2ExcelService');
 class Json2ExcelPanelProvider {
   constructor(context) {
     this._context = context
@@ -28,13 +29,20 @@ class Json2ExcelPanelProvider {
       } else if (message.type === 'querySettingList') {
         // webview query the persisted settings list
         this.listExportSettings()
-      } else if (message.type === 'detailSetting') {
+      } else if (message.type === 'querySettingDetail') {
         // webview query the specifed settings detail by listSetting's item
-        const { fileName } = message.payload
-        this.querySpecifiedSettings(fileName)
+        this.querySpecifiedSettings(message.payload)
       } else if (message.type === 'exportExcel') {
         const { data, settings } = message.payload
         this.saveExcel(data, settings)
+      } else if (message.type === 'webviewError') {
+        const logPath = vscode.Uri.joinPath(this._context.extensionUri, 'logs', dayjs().format('YYYYMMDD') + '.log')
+        const {
+            errMsg,
+            info,
+            stack
+        } = message.payload
+        fs.appendFileSync(logPath.fsPath, `${dayjs().format('HH:mm:ss')}\t${errMsg}\t${info}\t${stack}\r\n`);
       }
     })
     pannel.webview.html = this.getHtml(pannel.webview);
@@ -66,7 +74,7 @@ class Json2ExcelPanelProvider {
     const htmlPath = vscode.Uri.joinPath(
       this._context.extensionUri,
       'media',
-      'index.html'
+      'webview.html'
     );
 
     let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
@@ -75,9 +83,9 @@ class Json2ExcelPanelProvider {
       vscode.Uri.joinPath(this._context.extensionUri, 'media', 'index.js')
     );
 
-    const vueUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._context.extensionUri, 'media', 'vue.global.prod.js')
-    );
+    // const faviconUri = webview.asWebviewUri(
+    //   vscode.Uri.joinPath(this._context.extensionUri, 'media', 'favicon.icon')
+    // );
 
     const styleUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._context.extensionUri, 'media', 'style.css')
@@ -85,50 +93,58 @@ class Json2ExcelPanelProvider {
 
     const nonce = getNonce();
 
+    console.log(webview.cspSource)
     html = html
       .replaceAll('{{scriptUri}}', scriptUri)
       .replaceAll('{{styleUri}}', styleUri)
-      .replaceAll('{{vueUri}}', vueUri)
+      .replaceAll('{{cspSource}}', webview.cspSource)
+      // .replaceAll('{{faviconUri}}', faviconUri)
       .replaceAll('{{nonce}}', nonce);
+    
+    console.log(html)
     return html;
   }
 
   async saveExportSettings(settings) {
     if (!this._context.storageUri) {
-      vscode.window.showErrorMessage('Due to possible system settings issues, the settings data cannot be saved at this time.')
+      vscode.window.showErrorMessage(vscode.l10n.t('information.saveforbid'))
       return
     };
 
     const name = await vscode.window.showInputBox({
-      placeHolder: 'please input the setting\'s name',
-      title: 'Please Input The Setting\'s Name',
+      placeHolder: vscode.l10n.t('information.settingNamePlaceholder'),
+      title: vscode.l10n.t('information.settingNameTitle'),
       validateInput(value) {
         if (!/^[a-zA-Z0-9\u4e00-\u9fa5\-_\.\s]+$/.test(value)) {
-          return { message: `filename contain invalid character`, severity: vscode.InputBoxValidationSeverity.Error };
+          return {
+            message: vscode.l10n.t('information.settingNameError'), 
+            severity: vscode.InputBoxValidationSeverity.Error
+          };
         }
         if (value.length > 64) {
-          return { message: `filename is too long`, severity: vscode.InputBoxValidationSeverity.Error };
+          return {
+            message: vscode.l10n.t('information.settingNameTooLong'), 
+            severity: vscode.InputBoxValidationSeverity.Error
+          };
         }
       }
     })
     if (name) {
       const filePath = path.join(this._context.storageUri.fsPath, `${name}.j2esettings.json`)
       if (fs.existsSync(filePath)) {
-        const choice = await vscode.window.showQuickPick([
-          {
-            label: 'Cover It',
-            value: 'yes'
-          },
-          {
-            label: 'Rename',
-            value: 'No'
-          }
-        ], {
-          title: 'FileName Existed!',
-        })
-        if (choice && choice.value === 'yes') {
+        const choice = await vscode.window.showWarningMessage(
+          vscode.l10n.t('information.fileexisted'),
+          { modal: true },
+          vscode.l10n.t('information.coverit'),
+          vscode.l10n.t('information.rename')
+        )
+        if (choice === vscode.l10n.t('information.coverit')) {
           fs.writeFileSync(filePath, JSON.stringify(settings, null, 2), { encoding: 'utf-8' });
-        } else {
+          vscode.window.showInformationMessage(vscode.l10n.t('information.settingsaved'));
+          this.postMessage({
+            type: 'settingsListUpdated'
+          })
+        } else if (choice === vscode.l10n.t('information.coverit')) {
           await this.saveExportSettings(settings)
         }
         return
@@ -137,6 +153,10 @@ class Json2ExcelPanelProvider {
         fs.mkdirSync(this._context.storageUri.fsPath, { recursive: true });
       }
       fs.writeFileSync(filePath, JSON.stringify(settings, null, 2), { encoding: 'utf-8' });
+      vscode.window.showInformationMessage(vscode.l10n.t('information.settingsaved'));
+      this.postMessage({
+        type: 'settingsListUpdated'
+      })
     }
   }
 
@@ -151,14 +171,15 @@ class Json2ExcelPanelProvider {
     if (!uri) {
       return
     }
-    await fastExport(data, uri.path)
-    vscode.window.showInformationMessage(`文件已保存至：${path.basename(uri.path)}`);
+    await fastExport(data, uri.fsPath, settings)
+    
+    vscode.window.showInformationMessage(vscode.l10n.t('information.filesaved', uri.fsPath));
   }
 
   listExportSettings() {
     if (!this._context.storageUri) {
       this.postMessage({
-        type: 'listSettings',
+        type: 'settingsListResp',
         payload: []
       })
       return
@@ -171,37 +192,47 @@ class Json2ExcelPanelProvider {
       }
     })
     this.postMessage({
-      type: 'listSettings',
+      type: 'settingsListResp',
       payload: settingsCache
     })
   }
 
-  querySpecifiedSettings(fileName) {
+  querySpecifiedSettings(cacheInfo) {
+    const { fileName, settingName } = cacheInfo
     if (!this._context.storageUri) {
       this.postMessage({
-        type: 'detailSettings',
-        payload: []
+        type: 'detailSettingsResp',
+        payload: {
+          settingName,
+          settingsDetail: []
+        }
       })
       return
     }
     const fullPath = path.join(this._context.storageUri.fsPath, fileName)
     if (!fs.existsSync(fullPath)) {
       this.postMessage({
-        type: 'detailSettings',
-        payload: []
+        type: 'detailSettingsResp',
+        payload: {
+          settingName,
+          settingsDetail: []
+        }
       })
       return
     }
     try {
       const content = JSON.parse(fs.readFileSync(fullPath, { encoding: 'utf-8' }))
       this.postMessage({
-        type: 'detailSettings',
-        payload: content
+        type: 'detailSettingsResp',
+        payload: {
+          settingName,
+          settingsDetail: content
+        }
       })
     } catch {
       this.postMessage({
-        type: 'detailSettings',
-        payload: []
+        type: 'detailSettingsResp',
+        settingsDetail: []
       })
     }
   }

@@ -1,9 +1,10 @@
 const { Workbook } = require('exceljs')
 
-async function fastExport (data, outputPath) {
+async function fastExport (data, outputPath, settings = []) {
   const wb = new Workbook();
   const ws = wb.addWorksheet('Data');
   
+  console.log(settings);
   // 1. 先写入 headers
   ws.columns = Object.keys(data[0]).map(key => ({ header: key, key }));
   

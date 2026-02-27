@@ -14,6 +14,7 @@
     "onCommand:json2excel"
   ],
   "main": "./extension.js",
+  "l10n": "./l10n",
   "contributes": {
     "menus": {
       "editor/context": [
@@ -45,6 +46,7 @@
     "eslint": "^9.39.2"
   },
   "dependencies": {
+    "dayjs": "^1.11.19",
     "exceljs": "^4.4.0"
   }
 }
