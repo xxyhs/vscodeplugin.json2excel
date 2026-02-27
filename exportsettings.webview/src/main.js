@@ -56,7 +56,6 @@ app.config.errorHandler = (error, instance, info) => {
     type: 'webviewError',
     payload: {
       errMsg: error?.message,
-      info,
       stack: error?.stack
     }
   })

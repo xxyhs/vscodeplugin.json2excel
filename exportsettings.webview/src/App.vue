@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, watchEffect } from 'vue';
+import { ref, reactive, onMounted, watchEffect, toRaw } from 'vue';
 import { parseSettingsContext } from './utils'
 // debug webview in browser with a mock vscode
 const vscode = import.meta.env.DEV ? {
@@ -33,7 +33,7 @@ const queryCachedSettings = () => {
 const saveSettings = () => {
   vscode.postMessage({
     type: 'saveSettings',
-    payload: settingsContext.value
+    payload: toRaw(settingsContext.value)
   })
 };
 
@@ -41,8 +41,8 @@ const exportExcel = () => {
   vscode.postMessage({
     type: 'exportExcel',
     payload: {
-      data: jsonData.value,
-      settings: settingsContext.value
+      data: toRaw(jsonData.value),
+      settings: toRaw(settingsContext.value)
     }
   })
 };
@@ -52,16 +52,13 @@ const colToggle = (colSetting, evt) => {
 }
 
 watchEffect(() => {
-  vscode.postMessage({ type: 'watcheffect', payload: selectedSettingName.value });
   if (selectedSettingName.value) {
     const settingsDetail = cachedSettingsMap.get(selectedSettingName.value)
-    vscode.postMessage({ type: 'watcheffect2', payload: settingsDetail });
     if (!settingsDetail) {
       const selectedItem = cachedSettings.value.find(t => t.settingName === selectedSettingName.value)
-      vscode.postMessage({ type: 'watcheffect3', payload: selectedItem });
       vscode.postMessage({
         type: 'querySettingDetail',
-        payload: selectedItem
+        payload: toRaw(selectedItem)
       })
     } else {
       selectedSettingDetail.value = cachedSettingsMap.get(selectedSettingName.value)
@@ -85,7 +82,7 @@ onMounted(() => {
         break;
       }
       case 'settingsListResp': {
-        cachedSettings.value = message.payload;
+        cachedSettings.value = message.payload
         break;
       }
       case 'settingsListUpdated': {

@@ -83,9 +83,9 @@ class Json2ExcelPanelProvider {
       vscode.Uri.joinPath(this._context.extensionUri, 'media', 'index.js')
     );
 
-    // const faviconUri = webview.asWebviewUri(
-    //   vscode.Uri.joinPath(this._context.extensionUri, 'media', 'favicon.icon')
-    // );
+    const faviconUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._context.extensionUri, 'media', 'favicon.icon')
+    );
 
     const styleUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._context.extensionUri, 'media', 'style.css')
@@ -98,10 +98,9 @@ class Json2ExcelPanelProvider {
       .replaceAll('{{scriptUri}}', scriptUri)
       .replaceAll('{{styleUri}}', styleUri)
       .replaceAll('{{cspSource}}', webview.cspSource)
-      // .replaceAll('{{faviconUri}}', faviconUri)
+      .replaceAll('{{faviconUri}}', faviconUri)
       .replaceAll('{{nonce}}', nonce);
     
-    console.log(html)
     return html;
   }
 
@@ -184,7 +183,14 @@ class Json2ExcelPanelProvider {
       })
       return
     }
-    const files = fs.readdirSync(this._context.storageUri.fsPath)
+    if (!fs.existsSync(this._context.storageUri.fsPath)) {
+      this.postMessage({
+        type: 'settingsListResp',
+        payload: []
+      })
+      return
+    }
+    const files = fs.readdirSync(this._context.storageUri.fsPath);
     const settingsCache = files.filter(file => file.endsWith('.j2esettings.json')).map(file => {
       return {
         filename: file,
