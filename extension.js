@@ -10,8 +10,6 @@ let currentPanel = undefined;
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-
-	console.log(vscode.l10n.t('exportSettingPannel.title'));
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "excelexporter" is now active!');
