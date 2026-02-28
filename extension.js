@@ -41,7 +41,7 @@ function activate(context) {
 		} else {
 			currentPanel = vscode.window.createWebviewPanel(
 				'JSON2ExcelWebView',
-				vscode.l10n.t('exportSettingPannel.title'),
+				vscode.l10n.t('Export Settings'),
 				vscode.ViewColumn.Beside,
 				{
 					enableScripts: true,
@@ -80,7 +80,7 @@ async function parseJsonArray(provider) {
 	try {
 		const json = JSON.parse(text);
 		if (!Array.isArray(json)) {
-			vscode.window.showErrorMessage(vscode.l10n.t('information.notjsonarray'));
+			vscode.window.showErrorMessage(vscode.l10n.t('The selected JSON is not an array.'));
 			return;
 		}
 		provider.postMessage({
@@ -92,7 +92,7 @@ async function parseJsonArray(provider) {
 			type: 'jsonUpdate',
 			payload: []
 		});
-		vscode.window.showErrorMessage(vscode.l10n.t('information.invaidjson'));
+		vscode.window.showErrorMessage(vscode.l10n.t('Invalid JSON'));
 	}
 }
 

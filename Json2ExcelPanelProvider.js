@@ -45,19 +45,19 @@ class Json2ExcelPanelProvider {
         fs.appendFileSync(logPath.fsPath, `${dayjs().format('HH:mm:ss')}\t${errMsg}\t${info}\t${stack}\r\n`);
       } else if (message.type === 'paste') {
         const result = await vscode.window.showInformationMessage(
-          vscode.l10n.t('information.clipboardCanUseTip'),
+          vscode.l10n.t("Use the clipboard's data to export?"),
           { modal: false },
-          vscode.l10n.t('information.confirm'),
-          vscode.l10n.t('information.cancel')
+          vscode.l10n.t('Confirm'),
+          vscode.l10n.t('Cancel')
         )
-        if (result === vscode.l10n.t('information.confirm')) {
+        if (result === vscode.l10n.t('Confirm')) {
           this.postMessage({
             type: 'jsonUpdate',
             payload: message.payload
           })
         }
       } else if (message.type === 'pasteCantUse') {
-        vscode.window.showWarningMessage(vscode.l10n.t('information.clipboardCantUseTip'));
+        vscode.window.showWarningMessage(vscode.l10n.t('Sorry, clipboard data could not be processed. Please check the format and try again.'));
       }
     })
     pannel.webview.html = this.getHtml(pannel.webview);
@@ -118,23 +118,23 @@ class Json2ExcelPanelProvider {
 
   async saveExportSettings(settings) {
     if (!this._context.storageUri) {
-      vscode.window.showErrorMessage(vscode.l10n.t('information.saveforbid'))
+      vscode.window.showErrorMessage(vscode.l10n.t('The settings cannot be saved due to possible system settings.'))
       return
     };
 
     const name = await vscode.window.showInputBox({
-      placeHolder: vscode.l10n.t('information.settingNamePlaceholder'),
-      title: vscode.l10n.t('information.settingNameTitle'),
+      placeHolder: vscode.l10n.t('Enter the export settings name.'),
+      title: vscode.l10n.t('Name Export Settings'),
       validateInput(value) {
         if (!/^[a-zA-Z0-9\u4e00-\u9fa5\-_\.\s]+$/.test(value)) {
           return {
-            message: vscode.l10n.t('information.settingNameError'), 
+            message: vscode.l10n.t('Filename contains invalid characters'), 
             severity: vscode.InputBoxValidationSeverity.Error
           };
         }
         if (value.length > 64) {
           return {
-            message: vscode.l10n.t('information.settingNameTooLong'), 
+            message: vscode.l10n.t('The filename is too long.'), 
             severity: vscode.InputBoxValidationSeverity.Error
           };
         }
@@ -144,18 +144,18 @@ class Json2ExcelPanelProvider {
       const filePath = path.join(this._context.storageUri.fsPath, `${name}.j2esettings.json`)
       if (fs.existsSync(filePath)) {
         const choice = await vscode.window.showWarningMessage(
-          vscode.l10n.t('information.fileexisted'),
+          vscode.l10n.t('The filename already exists.'),
           { modal: true },
-          vscode.l10n.t('information.coverit'),
-          vscode.l10n.t('information.rename')
+          vscode.l10n.t('Cover'),
+          vscode.l10n.t('Rename')
         )
-        if (choice === vscode.l10n.t('information.coverit')) {
+        if (choice === vscode.l10n.t('Cover')) {
           fs.writeFileSync(filePath, JSON.stringify(settings, null, 2), { encoding: 'utf-8' });
-          vscode.window.showInformationMessage(vscode.l10n.t('information.settingsaved'));
+          vscode.window.showInformationMessage(vscode.l10n.t('Export settings have been saved.'));
           this.postMessage({
             type: 'settingsListUpdated'
           })
-        } else if (choice === vscode.l10n.t('information.coverit')) {
+        } else if (choice === vscode.l10n.t('Cover')) {
           await this.saveExportSettings(settings)
         }
         return
@@ -164,7 +164,7 @@ class Json2ExcelPanelProvider {
         fs.mkdirSync(this._context.storageUri.fsPath, { recursive: true });
       }
       fs.writeFileSync(filePath, JSON.stringify(settings, null, 2), { encoding: 'utf-8' });
-      vscode.window.showInformationMessage(vscode.l10n.t('information.settingsaved'));
+      vscode.window.showInformationMessage(vscode.l10n.t('Export settings have been saved.'));
       this.postMessage({
         type: 'settingsListUpdated'
       })
@@ -184,7 +184,15 @@ class Json2ExcelPanelProvider {
     }
     await fastExport(data, uri.fsPath, settings)
     
-    vscode.window.showInformationMessage(vscode.l10n.t('information.filesaved', uri.fsPath));
+    const choice = await vscode.window.showInformationMessage(
+      vscode.l10n.t('The file has been saved to {0}', uri.fsPath),
+      { modal: false },
+      vscode.l10n.t('Open'),
+      vscode.l10n.t('Close')
+    );
+    if (choice === vscode.l10n.t('Open')) {
+      vscode.env.openExternal(vscode.Uri.file(uri.fsPath))
+    }
   }
 
   listExportSettings() {
