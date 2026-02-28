@@ -14,7 +14,7 @@ class Json2ExcelPanelProvider {
 
   resolvePanelWebview(pannel) {
     this._view = pannel;
-    pannel.webview.onDidReceiveMessage(message => {
+    pannel.webview.onDidReceiveMessage(async (message) => {
       console.log('receive message from webview', message)
       if (message.type === 'ready') {
         // When the panel is opened for the first time, post the json data to webview for render
@@ -25,7 +25,7 @@ class Json2ExcelPanelProvider {
         })
       } else if (message.type === 'saveSettings') {
         // webview send the form data for persistence
-        this.saveExportSettings(message.payload)
+        await this.saveExportSettings(message.payload)
       } else if (message.type === 'querySettingList') {
         // webview query the persisted settings list
         this.listExportSettings()
@@ -43,6 +43,21 @@ class Json2ExcelPanelProvider {
             stack
         } = message.payload
         fs.appendFileSync(logPath.fsPath, `${dayjs().format('HH:mm:ss')}\t${errMsg}\t${info}\t${stack}\r\n`);
+      } else if (message.type === 'paste') {
+        const result = await vscode.window.showInformationMessage(
+          vscode.l10n.t('information.clipboardCanUseTip'),
+          { modal: false },
+          vscode.l10n.t('information.confirm'),
+          vscode.l10n.t('information.cancel')
+        )
+        if (result === vscode.l10n.t('information.confirm')) {
+          this.postMessage({
+            type: 'jsonUpdate',
+            payload: message.payload
+          })
+        }
+      } else if (message.type === 'pasteCantUse') {
+        vscode.window.showWarningMessage(vscode.l10n.t('information.clipboardCantUseTip'));
       }
     })
     pannel.webview.html = this.getHtml(pannel.webview);
@@ -79,12 +94,10 @@ class Json2ExcelPanelProvider {
 
     let html = fs.readFileSync(htmlPath.fsPath, 'utf8');
 
+    const language = vscode.env.language;
+
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this._context.extensionUri, 'media', 'index.js')
-    );
-
-    const faviconUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._context.extensionUri, 'media', 'favicon.icon')
     );
 
     const styleUri = webview.asWebviewUri(
@@ -93,12 +106,11 @@ class Json2ExcelPanelProvider {
 
     const nonce = getNonce();
 
-    console.log(webview.cspSource)
     html = html
+      .replace('{{lang}}', language)
       .replaceAll('{{scriptUri}}', scriptUri)
       .replaceAll('{{styleUri}}', styleUri)
       .replaceAll('{{cspSource}}', webview.cspSource)
-      .replaceAll('{{faviconUri}}', faviconUri)
       .replaceAll('{{nonce}}', nonce);
     
     return html;

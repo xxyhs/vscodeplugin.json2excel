@@ -16,18 +16,26 @@ function activate(context) {
 	// Check Current Active TextEditor
 	showContextMenu()
 	// Watch Editor Selection if json array was selected show the context menu
-	vscode.window.onDidChangeTextEditorSelection(event => {
-		showContextMenu(event.textEditor)
+	vscode.window.onDidChangeTextEditorSelection(() => {
+		showContextMenu()
 	});
 
-	vscode.window.onDidChangeActiveTextEditor((event) => {
-		showContextMenu(event)
+	vscode.window.onDidChangeNotebookEditorSelection(() => {
+		showContextMenu()
+	})
+
+	vscode.window.onDidChangeActiveNotebookEditor(() => {
+		showContextMenu()
+	})
+
+	vscode.window.onDidChangeActiveTextEditor(() => {
+		showContextMenu()
 	})
 	const json2ExcelPanelProvider = new Json2ExcelPanelProvider(context);
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with  registerCommand
 	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('excelExporter.json2excel', () => {
+	const disposable = vscode.commands.registerCommand('excelExporter.json2excel', async () => {
 		if (currentPanel) {
 			currentPanel.reveal(vscode.ViewColumn.Beside);
 		} else {
@@ -43,6 +51,7 @@ function activate(context) {
 					retainContextWhenHidden: true
 				}
 			);
+			currentPanel.iconPath = vscode.Uri.joinPath(context.extensionUri, 'media', 'icon-excel.svg');
 			currentPanel.onDidDispose(() => {
 				json2ExcelPanelProvider.webviewDispose()
 				currentPanel = undefined
@@ -59,22 +68,21 @@ function activate(context) {
 // This method is called when your extension is deactivated
 function deactivate() { }
 
-function parseJsonArray(provider) {
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) return;
-	const selection = editor.selection;
-	let text = editor.document.getText(selection);
-	if (!text && editor.document.languageId === 'json') {
-		text = editor.document.getText()
+async function parseJsonArray(provider) {
+	let text = getActiveJsonOrSelectionText();
+	if (!text) {
+		// read clipboard's text
+		const clipboardText = await vscode.env.clipboard.readText();
+		if (clipboardText) {
+			text = clipboardText
+		}
 	}
 	try {
 		const json = JSON.parse(text);
-
 		if (!Array.isArray(json)) {
 			vscode.window.showErrorMessage(vscode.l10n.t('information.notjsonarray'));
 			return;
 		}
-
 		provider.postMessage({
 			type: 'jsonUpdate',
 			payload: json
@@ -88,17 +96,10 @@ function parseJsonArray(provider) {
 	}
 }
 
-function showContextMenu(textEditor) {
-	const editor = textEditor || vscode.window.activeTextEditor;
-	let text = editor.document.getText(editor.selection);
+function showContextMenu() {
+	const text = getActiveJsonOrSelectionText()
 	let isJsonArray = false;
 	if (text) {
-		try {
-			const parsed = JSON.parse(text);
-			isJsonArray = Array.isArray(parsed);
-		} catch { }
-	} else if (editor.document.languageId === 'json') {
-		const text = editor.document.getText()
 		try {
 			const parsed = JSON.parse(text);
 			isJsonArray = Array.isArray(parsed);
@@ -109,6 +110,28 @@ function showContextMenu(textEditor) {
 		'excelExporter.isJsonArray',
 		isJsonArray
 	);
+}
+
+function getActiveJsonOrSelectionText () {
+	const editor = vscode.window.activeTextEditor;
+	let text = ''
+	if (editor) {
+		if (!editor.selection.isEmpty) {
+			text = editor.document.getText(editor.selection);
+		} else if (editor.document.languageId === 'json') {
+			text = editor.document.getText();
+		}
+	} else {
+		const nbEditor = vscode.window.activeNotebookEditor;
+		if (nbEditor) {
+			if (nbEditor.selections.length) {
+				const selectedCells = nbEditor.selections
+      		.flatMap(range => nbEditor.notebook.getCells(range));
+				text = selectedCells.map(c => c.document.getText()).join("\n");
+			}
+		}
+	}
+	return text
 }
 
 module.exports = {

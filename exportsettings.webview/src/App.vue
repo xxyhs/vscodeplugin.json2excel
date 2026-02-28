@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, watchEffect, toRaw } from 'vue';
+import { ref, reactive, onMounted, watchEffect, toRaw, onBeforeMount } from 'vue';
 import { parseSettingsContext } from './utils'
 // debug webview in browser with a mock vscode
 const vscode = import.meta.env.DEV ? {
@@ -66,7 +66,7 @@ watchEffect(() => {
   }
 });
 
-onMounted(() => {
+onBeforeMount(() => {
   window.addEventListener('message', event => {
     const message = event.data;
     switch (message.type) {
@@ -92,8 +92,10 @@ onMounted(() => {
       default: break;
     }
   });
-
   vscode.postMessage({ type: 'ready' });
+});
+
+onMounted(() => {
   if (import.meta.env.DEV) {
     const devData = [
       {
@@ -110,6 +112,32 @@ onMounted(() => {
     jsonData.value = devData
     settingsContext.value = parseSettingsContext(devData)
   }
+  window.addEventListener('paste', (e) => {
+    const target = e.target;
+
+    const isInput =
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement ||
+      target.isContentEditable;
+
+    if (!isInput) {
+      e.preventDefault();
+      const text = e.clipboardData?.getData('text');
+      try {
+        const json = JSON.parse(text);
+        if (Array.isArray(json)) {
+          vscode.postMessage({
+            type: 'paste',
+            payload: json
+          });
+        }
+      } catch {
+        vscode.postMessage({
+          type: 'pasteCantUse'
+        });
+      }
+    }
+  })
   queryCachedSettings();
 })
 
@@ -124,20 +152,17 @@ onMounted(() => {
     <div v-if="cachedSettings && cachedSettings.length" class="right">
       <label>{{ $t('History Settings') }}</label>
       <vscode-dropdown v-model="selectedSettingName">
-        <vscode-option value="" :selected="selectedSettingName === ''">{{ $t('Do not use history settings') }}</vscode-option>
-        <vscode-option v-for="setting in cachedSettings"
-          :key="setting.settingName"
-          :value="setting.settingName"
+        <vscode-option value="" :selected="selectedSettingName === ''">{{ $t('Do not use history settings')
+          }}</vscode-option>
+        <vscode-option v-for="setting in cachedSettings" :key="setting.settingName" :value="setting.settingName"
           :selected="selectedSettingName === setting.settingName">{{ setting.settingName }}</vscode-option>
       </vscode-dropdown>
     </div>
   </div>
   <vscode-divider role="separator"></vscode-divider>
   <div class="j2e-settings">
-    <vscode-data-grid
-      grid-template-columns="80px 1fr 1.5fr 150px"  
-    >
-       <vscode-data-grid-row row-type="header">
+    <vscode-data-grid grid-template-columns="80px 1fr 1.5fr 150px">
+      <vscode-data-grid-row row-type="header">
         <vscode-data-grid-cell cell-type="columnheader" grid-column="1">
           {{ $t('Export') }}?
         </vscode-data-grid-cell>

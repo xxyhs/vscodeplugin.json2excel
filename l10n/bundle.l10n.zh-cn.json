@@ -5,7 +5,6 @@
   "command.showExportSettings.title": "JSON导出到Excel",
   "exportSettingIcon.title": "打开导出设置面板",
   "exportSettingPannel.title": "导出设置",
-
   "information.invaidjson": "无效格式JSON",
   "information.notjsonarray": "所选择的JSON不是一个数组",
   "information.settingsaved": "导出设置已保存",
@@ -17,5 +16,9 @@
   "information.settingNameTitle": "导出设置命名",
   "information.settingNamePlaceholder": "请输入导出设置名称",
   "information.settingNameError": "文件名包含无效字符",
-  "information.settingNameTooLong": "文件名太长"
+  "information.settingNameTooLong": "文件名太长",
+  "information.clipboardCanUseTip": "使用剪贴板数据进行导出？",
+  "information.confirm": "确认",
+  "information.cancel": "取消",
+  "information.clipboardCantUseTip": "抱歉，剪贴板数据无法处理请检查格式后重试"
 }

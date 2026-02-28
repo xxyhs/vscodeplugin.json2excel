@@ -10,14 +10,15 @@ export default {
   debug: import.meta.env.DEV,
   fallbackLng: 'en',
   detection: {
-    convertDetectedLanguage: (lng) => lng.replace('-', '').replace('_', '')
+    order: ['htmlTag', 'navigator'],
+    convertDetectedLanguage: (lng) => lng.replace('-', '').replace('_', '').toLowerCase()
   },
   resources: {
     en: {
       nativeName: 'English',
       translation: transEn
     },
-    zhCN: {
+    zhcn: {
       nativeName: '简体中文',
       translation: transZhCN
     }

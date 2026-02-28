@@ -5,7 +5,6 @@
   "command.showExportSettings.title": "Export Excel From JSON Excel",
   "exportSettingIcon.title": "Open Export Setting Pannel",
   "exportSettingPannel.title": "Export Settings",
-
   "information.invaidjson": "Invalid JSON",
   "information.notjsonarray": "The selected JSON is not an array.",
   "information.settingsaved": "Export settings have been saved.",
@@ -17,5 +16,9 @@
   "information.settingNameTitle": "Name Export Settings",
   "information.settingNamePlaceholder": "Enter the export settings name.",
   "information.settingNameError": "Filename contains invalid characters",
-  "information.settingNameTooLong": "The filename is too long."
+  "information.settingNameTooLong": "The filename is too long.",
+  "information.clipboardCanUseTip": "Use the clipboard's data to export?",
+  "information.confirm": "Confirm",
+  "information.cancel": "Cancel",
+  "information.clipboardCantUseTip": "Sorry, clipboard data could not be processed. Please check the format and try again."
 }
