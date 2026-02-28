@@ -31,6 +31,12 @@ const queryCachedSettings = () => {
 };
 
 const saveSettings = () => {
+  if (settingsContext.value.filter(s => s.selected).length === 0) {
+    vscode.postMessage({
+      type: 'noColumnSelected'
+    })
+    return;
+  }
   vscode.postMessage({
     type: 'saveSettings',
     payload: toRaw(settingsContext.value)
@@ -38,6 +44,18 @@ const saveSettings = () => {
 };
 
 const exportExcel = () => {
+  if (!jsonData.value || jsonData.value.length === 0) {
+    vscode.postMessage({
+      type: 'noDataToExport'
+    })
+    return;
+  }
+  if (settingsContext.value.filter(s => s.selected).length === 0) {
+    vscode.postMessage({
+      type: 'noColumnSelected'
+    })
+    return;
+  }
   vscode.postMessage({
     type: 'exportExcel',
     payload: {
@@ -160,7 +178,7 @@ onMounted(() => {
     </div>
   </div>
   <vscode-divider role="separator"></vscode-divider>
-  <div class="j2e-settings">
+  <div v-if="jsonData && jsonData.length" class="j2e-settings">
     <vscode-data-grid grid-template-columns="80px 1fr 1.5fr 150px">
       <vscode-data-grid-row row-type="header">
         <vscode-data-grid-cell cell-type="columnheader" grid-column="1">
@@ -184,7 +202,7 @@ onMounted(() => {
           {{ colSetting.prop }}
         </vscode-data-grid-cell>
         <vscode-data-grid-cell grid-column="3">
-          <vscode-text-field v-model="colSetting.colName"></vscode-text-field>
+          <vscode-text-field v-model="colSetting.colName" :maxlength="64" :placeholder="$t('Input Excel Column Name')"></vscode-text-field>
         </vscode-data-grid-cell>
         <vscode-data-grid-cell grid-column="4">
           <vscode-dropdown v-model="colSetting.colType">
@@ -195,5 +213,13 @@ onMounted(() => {
         </vscode-data-grid-cell>
       </vscode-data-grid-row>
     </vscode-data-grid>
+  </div>
+  <div v-else class="tips">
+    <h4 style="padding-inline-start: calc(40px - 1rem)">{{ $t('NoJsonData') }}</h4>
+    <ul>
+      <li style="font-size: 0.75rem;">{{ $t('UseSelection') }}</li>
+      <li style="font-size: 0.75rem;">{{ $t('ReadTextEditor') }}</li>
+      <li style="font-size: 0.75rem;">{{ $t('UseClipboard') }}</li>
+    </ul>
   </div>
 </template>

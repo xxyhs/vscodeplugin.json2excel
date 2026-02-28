@@ -22,5 +22,7 @@
   "Cancel": "取消",
   "Sorry, clipboard data could not be processed. Please check the format and try again.": "抱歉，剪贴板数据无法处理请检查格式后重试",
   "Open": "打开",
-  "Close": "关闭"
+  "Close": "关闭",
+  "No Data To Export. Please check if the JSON data is correct and try again.": "没有可导出的数据，请检查JSON数据是否正确后重试",
+  "No Column Selected. Please select at least one column to export.": "没有选择列，请至少选择一列进行导出"
 }

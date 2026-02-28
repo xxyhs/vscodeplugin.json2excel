@@ -58,6 +58,10 @@ class Json2ExcelPanelProvider {
         }
       } else if (message.type === 'pasteCantUse') {
         vscode.window.showWarningMessage(vscode.l10n.t('Sorry, clipboard data could not be processed. Please check the format and try again.'));
+      } else if (message.type === 'noDataToExport') {
+        vscode.window.showWarningMessage(vscode.l10n.t('No Data To Export. Please check if the JSON data is correct and try again.'));
+      } else if (message.type === 'noColumnSelected') {
+        vscode.window.showWarningMessage(vscode.l10n.t('No Column Selected. Please select at least one column to export.'));
       }
     })
     pannel.webview.html = this.getHtml(pannel.webview);

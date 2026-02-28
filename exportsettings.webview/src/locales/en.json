@@ -9,5 +9,10 @@
   "Column Type": "Column Type",
   "String": "String",
   "Number": "Number",
-  "Date": "Date"
+  "Date": "Date",
+  "Input Excel Column Name": "Input Excel Column Name",
+  "NoJsonData": "No data to export, you can try with methods below",
+  "UseSelection": "Select JSON in VS Code's TextEditor and right-click to use 'JSON To Excel'",
+  "ReadTextEditor": "Right-click in json file in VS Code's TextEditor that contains JSON Array and use 'JSON To Excel'",
+  "UseClipboard": "Ctrl + V in JSON to Excel's Panel"
 }

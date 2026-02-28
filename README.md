@@ -66,6 +66,4 @@ You can author your README using Visual Studio Code.  Here are some useful edito
 
 ## todo
 
-ExcelExportSettings Apply
-
-Operation Tips in Webview
+History ExcelExportSettings Apply

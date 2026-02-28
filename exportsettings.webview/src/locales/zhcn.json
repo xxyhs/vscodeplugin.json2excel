@@ -9,5 +9,10 @@
   "Column Type": "Excel类型",
   "String": "文本",
   "Number": "数字",
-  "Date": "日期"
+  "Date": "日期",
+  "Input Excel Column Name": "输入Excel列名",
+  "NoJsonData": "无可导出数据,你可以尝试以下方法",
+  "UseSelection": "在VS Code的编辑器种选择JSON文本并右键菜单选择'JSON转Excel'",
+  "ReadTextEditor": "在VS Code的编辑器种右键打开包含JSON数组的JSON文件并右键菜单选择'JSON转Excel'",
+  "UseClipboard": "在本页面上使用Ctrl + V读取剪贴板中的JSON数据"
 }
