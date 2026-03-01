@@ -2,6 +2,11 @@
   "name": "excelexporter",
   "displayName": "%displayName%",
   "description": "%decription%",
+  "publisher": "xxyhs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xxyhs/vscodeplugin.json2excel"
+  },
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.109.0"
