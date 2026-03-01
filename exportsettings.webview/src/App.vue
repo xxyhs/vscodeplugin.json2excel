@@ -1,6 +1,7 @@
 <script setup>
 import { ref, reactive, onMounted, watchEffect, toRaw, onBeforeMount } from 'vue';
-import { parseSettingsContext } from './utils'
+import { parseSettingsContext, diffSettingContext } from './utils'
+import { parse } from 'path';
 // debug webview in browser with a mock vscode
 const vscode = import.meta.env.DEV ? {
   postMessage: (message) => {
@@ -79,7 +80,15 @@ watchEffect(() => {
         payload: toRaw(selectedItem)
       })
     } else {
-      selectedSettingDetail.value = cachedSettingsMap.get(selectedSettingName.value)
+      selectedSettingDetail.value = cachedSettingsMap.get(selectedSettingName.value);
+      selectedSettingDetail.value.forEach(detail => {
+        const contextItem = settingsContext.value.find(c => c.prop === detail.prop);
+        if (contextItem) {
+          contextItem.selected = detail.selected;
+          contextItem.colName = detail.colName;
+          contextItem.colType = detail.colType;
+        }
+      })
     }
   }
 });
@@ -90,17 +99,37 @@ onBeforeMount(() => {
     switch (message.type) {
       case 'jsonUpdate': {
         jsonData.value = message.payload;
-        settingsContext.value = parseSettingsContext(message.payload);
+        const parsedContext = parseSettingsContext(message.payload);
+        if (diffSettingContext(parsedContext, settingsContext.value)) {
+          selectedSettingName.value = '';
+          selectedSettingDetail.value = [];
+          settingsContext.value = parsedContext;
+        }
         break;
       }
       case 'detailSettingsResp': {
         const { settingName, settingsDetail } = message.payload;
         cachedSettingsMap.set(settingName, settingsDetail);
         selectedSettingDetail.value = cachedSettingsMap.get(selectedSettingName.value);
+        selectedSettingDetail.value.forEach(detail => {
+          const contextItem = settingsContext.value.find(c => c.prop === detail.prop)
+          if (contextItem) {
+            contextItem.selected = detail.selected
+            contextItem.colName = detail.colName
+            contextItem.colType = detail.colType
+          }
+        })
         break;
       }
       case 'settingsListResp': {
         cachedSettings.value = message.payload
+        if (selectedSettingName.value) {
+          const exist = message.payload.find(t => t.settingName === selectedSettingName.value)
+          if (!exist) {
+            selectedSettingName.value = '';
+            selectedSettingDetail.value = [];
+          }
+        }
         break;
       }
       case 'settingsListUpdated': {
@@ -171,7 +200,7 @@ onMounted(() => {
       <label>{{ $t('History Settings') }}</label>
       <vscode-dropdown v-model="selectedSettingName">
         <vscode-option value="" :selected="selectedSettingName === ''">{{ $t('Do not use history settings')
-          }}</vscode-option>
+        }}</vscode-option>
         <vscode-option v-for="setting in cachedSettings" :key="setting.settingName" :value="setting.settingName"
           :selected="selectedSettingName === setting.settingName">{{ setting.settingName }}</vscode-option>
       </vscode-dropdown>
@@ -202,7 +231,8 @@ onMounted(() => {
           {{ colSetting.prop }}
         </vscode-data-grid-cell>
         <vscode-data-grid-cell grid-column="3">
-          <vscode-text-field v-model="colSetting.colName" :maxlength="64" :placeholder="$t('Input Excel Column Name')"></vscode-text-field>
+          <vscode-text-field v-model="colSetting.colName" :maxlength="64"
+            :placeholder="$t('Input Excel Column Name')"></vscode-text-field>
         </vscode-data-grid-cell>
         <vscode-data-grid-cell grid-column="4">
           <vscode-dropdown v-model="colSetting.colType">

@@ -186,7 +186,12 @@ class Json2ExcelPanelProvider {
     if (!uri) {
       return
     }
-    await fastExport(data, uri.fsPath, settings)
+    try {
+      await fastExport(data, uri.fsPath, settings)
+    } catch (e) {
+      vscode.window.showErrorMessage(vscode.l10n.t('Failed to export Excel file. Exception Info {0}.', e.message))
+      return
+    }
     
     const choice = await vscode.window.showInformationMessage(
       vscode.l10n.t('The file has been saved to {0}', uri.fsPath),
@@ -228,7 +233,8 @@ class Json2ExcelPanelProvider {
   }
 
   querySpecifiedSettings(cacheInfo) {
-    const { fileName, settingName } = cacheInfo
+    console.log('query settings detail with', cacheInfo)
+    const { filename, settingName } = cacheInfo
     if (!this._context.storageUri) {
       this.postMessage({
         type: 'detailSettingsResp',
@@ -239,7 +245,7 @@ class Json2ExcelPanelProvider {
       })
       return
     }
-    const fullPath = path.join(this._context.storageUri.fsPath, fileName)
+    const fullPath = path.join(this._context.storageUri.fsPath, filename)
     if (!fs.existsSync(fullPath)) {
       this.postMessage({
         type: 'detailSettingsResp',

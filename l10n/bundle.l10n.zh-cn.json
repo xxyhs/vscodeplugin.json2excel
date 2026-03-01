@@ -24,5 +24,6 @@
   "Open": "打开",
   "Close": "关闭",
   "No Data To Export. Please check if the JSON data is correct and try again.": "没有可导出的数据，请检查JSON数据是否正确后重试",
-  "No Column Selected. Please select at least one column to export.": "没有选择列，请至少选择一列进行导出"
+  "No Column Selected. Please select at least one column to export.": "没有选择列，请至少选择一列进行导出",
+  "Failed to export Excel file. Exception Info:{0}.": "导出Excel文件失败，异常信息:{0}",
 }

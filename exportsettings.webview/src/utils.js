@@ -51,3 +51,9 @@ export function parseSettingsContext(jsonData) {
     };
   })
 }
+
+export function diffSettingContext(contextA, contextB) { 
+  const strA = contextA.map(t => `${t.prop}-${t.colName}-${t.colType}`).join('|');
+  const strB = contextB.map(t => `${t.prop}-${t.colName}-${t.colType}`).join('|');
+  return strA !== strB;
+}
