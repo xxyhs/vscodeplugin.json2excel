@@ -14,7 +14,7 @@ or use command panel with `JSON2Excel`, then we can open the export settings pan
 ![Image](https://github.com/user-attachments/assets/14544e9f-7dfe-4da2-891f-c54aaf53dc6d)
 
 
-the plugin will resolved json array in .json file or your selection json array. you can update the json data by click-right on another selected json array, or just paste on the pannel with Ctrl+V if the clipboard has json arrary data.
+the plugin will resolved json array in .json file or your selected json array. you can update the json data by click-right on another selected json array, or just paste on the pannel with Ctrl+V if the clipboard has json arrary data.
 ## Release Notes
 
 ### 0.0.1
